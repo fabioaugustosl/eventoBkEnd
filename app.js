@@ -15,9 +15,39 @@ var port = process.env.PORT || 3000;
 // diretorios publicos
 app.use(express.static('public'));
 
+
 //middlaware
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+
+
+//outra solução q nao cheguei a testar
+//var cors = require('cors');
+
+// use it before all route definitions
+//app.use(cors({origin: 'http://localhost:8888'}));
+
+//isso funcionou localhost
+app.use(function (req, res, next) {
+
+    // Website you wish to allow to connect
+    //res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+});
+
 //app.use(cookieParser());
 //app.use(session({secret: 'library'}));
 
@@ -37,12 +67,14 @@ var enderecoRouter = require('./src/routes/EnderecoEventoRoutes');
 var categoriaRouter = require('./src/routes/CategoriaEventoRoutes');
 var configuracaoIngressoRouter = require('./src/routes/ConfiguracaoIngressoEventoRoutes');
 var ingressoRouter = require('./src/routes/IngressoRoutes');
+var ingressoBaixaRouter = require('./src/routes/IngressoBaixaRoutes');
 
 app.use('/api/evento/v1', eventoRouter);
 app.use('/api/endereco/v1', enderecoRouter);
 app.use('/api/categoria/v1', categoriaRouter);
 app.use('/api/configuracaoIngresso/v1', configuracaoIngressoRouter);
 app.use('/api/ingresso/v1', ingressoRouter);
+app.use('/api/ingressoBaixa/v1/', ingressoBaixaRouter);
 
 
 app.get('/', function(req, res){
@@ -53,7 +85,7 @@ app.get('/', function(req, res){
 
 // start servidor
 app.listen(port, function(err){
-	console.log('running avalia on '+port);
+	console.log('running evento on '+port);
 });
 
 

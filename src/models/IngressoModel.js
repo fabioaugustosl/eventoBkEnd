@@ -3,7 +3,10 @@ var mongoose = require('mongoose'), Schema = mongoose.Schema;
 var ingressoModel = new Schema({
 	dono : {type:String},
 	idEvento : {type:String},
+	nomeEvento : {type:String},
 	idCliente : {type:String},
+	nomeCliente : {type:String},
+	acompanhante : {type:String},
 	dataGeracao : {type: Date, default: Date.now },
 	quantidade : {type:Number},
 	valorPG : {type:Number},

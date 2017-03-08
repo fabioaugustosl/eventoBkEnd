@@ -40,11 +40,7 @@ var jsFiles = ['*.js','src/**/*.js'];
 		.pipe(gulp.dest('./src/views'));
 });*/
 
-//gulp.task('test', function(){
-//	env({vars : {ENV: 'Test', PORT : 3000}});
-//	gulp.src('./src/tests/*.js', {read: false})
-//		.pipe(gulpMocha({reporter: 'nyan'}));
-//});
+
 
 gulp.task('default', [], function(){
 	var options = {

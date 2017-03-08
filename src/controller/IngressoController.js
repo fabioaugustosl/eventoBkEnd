@@ -18,8 +18,11 @@ var ingressoController = function(ingressoModel){
 		if(!req.body.idEvento) {
 			msgObrigatorio+= 'Evento é obrigatório.<br/>';
 		}
+		if(!req.body.nomeCliente) {
+			msgObrigatorio+= 'O nome do cliente é obrigatório.<br/>';
+		}
 		if(!req.body.idCliente) {
-			msgObrigatorio+= 'Cliente é obrigatório.<br/>';
+			msgObrigatorio+= 'O ID do cliente é obrigatório.<br/>';
 		}
 
 
@@ -34,23 +37,23 @@ var ingressoController = function(ingressoModel){
 				ingresso.valorPG = 0;
 			} 
 			
+			if(!ingresso.chave){
+				//gerar a chave unica do ingresso
+				var chave = moment().get('year') ;
+				chave += moment().get('date');
+				chave += moment().get('hour')
+				chave += moment().get('second')
+				chave += moment().get('millisecond');
+				chave += ingresso.idCliente;
+				chave += ingresso.idEvento;
+				console.log("Chave: ",chave);
 
-			//gerar a chave unica do ingresso
-			var chave = moment().get('year') ;
-			chave += moment().get('date');
-			chave += moment().get('hour')
-			chave += moment().get('second')
-			chave += moment().get('millisecond');
-			chave += ingresso.idCliente;
-			chave += ingresso.idEvento;
-			console.log("Chave: ",chave);
+				var hash = md5(chave);
+				console.log("Hash: ",hash);
+				ingresso.chave = hash;
+			}
 
-			var hash = md5(chave);
-			console.log("Hash: ",hash);
-			ingresso.chave = hash;
-
-
-			qrcode(hash, function(urlQRCode){
+			qrcode(ingresso.chave , function(urlQRCode){
 				ingresso.qrcodeImg = urlQRCode;
 				ingresso.save();
 				res.status(201);
@@ -72,9 +75,9 @@ var ingressoController = function(ingressoModel){
 
 		ingresso.save(function(err){
 			if(err){
-				res.status(500).send("false");
+				res.status(500).send("NOK");
 			} else {
-				res.status(201).send("true");
+				res.status(201).send("OK");
 			}
 		});
 	};
@@ -83,9 +86,9 @@ var ingressoController = function(ingressoModel){
 	var remover = function(req, res){
 		console.log(' ::: Remover Ingresso');
 
-		if(req.ingresso.dataBaixa){
-			res.status(500).send("Já foi realizada baixa deste ingresso. Por isso não é autorizado sua deleção.");
-		} else {
+		//if(req.ingresso.dataBaixa){
+		//	res.status(500).send("Já foi realizada baixa deste ingresso. Por isso não é autorizado sua deleção.");
+		//} else {
 			req.ingresso.remove(function(err){
 				if(err){
 					res.status(500).send(err);
@@ -93,7 +96,7 @@ var ingressoController = function(ingressoModel){
 					res.status(204).send('ingresso removido.');
 				}
 			});
-		}
+		//}
 	};
 
 
