@@ -8,11 +8,11 @@ var ingressoController = require('../controller/IngressoController')(ingressoMod
 
 
 ingressoRouter.use('/:ingressoId', function(req, res, next){
-	console.log('chegou no middleware');
+	console.log('chegou no middleware ingresso baixa');
 	console.log(req.params);
 	
 	// esse é nosso middleware
-	ingressoModel.findById(req.params.ingressoId, function(err, ingresso){
+	ingressoModel.findOne({ 'chave': req.params.ingressoId }, function(err, ingresso){
 		if(err){
 			res.status(500).send(err);
 		} else if(ingresso) {
@@ -27,18 +27,18 @@ ingressoRouter.use('/:ingressoId', function(req, res, next){
 
 		
 ingressoRouter.route('/:ingressoId')
-		.post(function(req, res){
+		.get(function(req, res){
 			console.log('chegou post baixa');
 			console.log(req.params);
 			console.log(req.params.ingressoId);
-			ingressoModel.findById(req.params.ingressoId, function(err, ingresso){
-				if(err){
-					res.status(500).send(err);
-				} else {
+			//ingressoModel.findOne({ 'chave': req.params.ingressoId }, function(err, ingresso){
+			//	if(err){
+			//		res.status(500).send(err);
+//} else {
 					console.log('vai chamar o baixa');
-					ingressoController.confirmarEntrada(ingresso,req, res);
-				}
-			});
+					ingressoController.confirmarEntrada(req.ingresso,req, res);
+			//	}
+			//});
 
 			
 		});
