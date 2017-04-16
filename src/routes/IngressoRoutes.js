@@ -1,10 +1,10 @@
 var express = require('express');
 
-var ingressoModel = require('../models/IngressoModel');
-
 var ingressoRouter = express.Router();
 
-var ingressoController = require('../controller/IngressoController')(ingressoModel);
+var configuracaoIngressoModel = require('../models/ConfiguracaoIngressoEventoModel');
+var ingressoModel = require('../models/IngressoModel');
+var ingressoController = require('../controller/IngressoController')(ingressoModel, configuracaoIngressoModel);
 
 
 ingressoRouter.route('/')
@@ -22,6 +22,7 @@ ingressoRouter.use('/:ingressoId', function(req, res, next){
 	if(req.params.ingressoId == 'baixa'){
 		next();
 	}
+
 	// esse é nosso middleware
 	ingressoModel.findById(req.params.ingressoId, function(err, ingresso){
 		if(err){

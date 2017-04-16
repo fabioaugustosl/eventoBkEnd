@@ -9,6 +9,7 @@ var configuracaoIngressoController = require('../controller/ConfiguracaoIngresso
 
 configuracaoIngressoRouter.route('/')
 		.post(function(req, res){
+			console.log('Chegou no route de configuração');
 			configuracaoIngressoController.salvarNovo(req, res);
 		})
 		.get(function(req, res){

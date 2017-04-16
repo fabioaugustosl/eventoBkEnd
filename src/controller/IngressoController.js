@@ -3,12 +3,14 @@ var md5 = require('md5');
 var moment = require('moment');
 var qrcode = require('../util/QRCodeUtil');
 
-var ingressoController = function(ingressoModel){
+var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 
 	var salvarNovo = function(req, res){
 		console.log(' ::: Salvar Novo Ingresso ');
 		var ingresso = new ingressoModel(req.body);
-		
+
+		var configuracaoIngresso = new configuracaoIngressoModel();
+
 		console.log(ingresso);
 		var msgObrigatorio = '';
 	
@@ -30,6 +32,34 @@ var ingressoController = function(ingressoModel){
 			res.status(400);
 			res.send(msgObrigatorio);
 		} else {
+
+			var qtdMax;
+			var qtdMaxPessoa;
+			var qtdIngressosJaCadastrados;
+			var qtdIngressosPessoa;
+
+			/*configuracaoIngresso.findOne({'idEvento': req.body.idEvento}, function(err, configIngressoEvento){
+				console.log('configuração do ingresso para esse evento: ',configIngressoEvento);
+
+				if(!err){
+					qtdMax = configIngressoEvento.quantidadeTotal;
+					qtdMaxPessoa = configIngressoEvento.quantidadeMaxPorPessoa;
+				}
+			});
+*/
+			ingressoModel.where({ 'idEvento': ingresso.idEvento }).count(function (err, count) {
+				if(!err){
+			  		qtdIngressosJaCadastrados = count;
+				}
+			});
+
+			ingressoModel.where({ 'idCliente': ingresso.idCliente }).count(function (err, count) {
+				if(!err){
+			  		qtdIngressosPessoa = count;
+				}
+			});
+
+
 			if(!ingresso.quantidade) {
 				ingresso.quantidade = 1;
 			} 
@@ -37,28 +67,44 @@ var ingressoController = function(ingressoModel){
 				ingresso.valorPG = 0;
 			} 
 			
-			if(!ingresso.chave){
-				//gerar a chave unica do ingresso
-				var chave = moment().get('year') ;
-				chave += moment().get('date');
-				chave += moment().get('hour')
-				chave += moment().get('second')
-				chave += moment().get('millisecond');
-				chave += ingresso.idCliente;
-				chave += ingresso.idEvento;
-				console.log("Chave: ",chave);
+			console.log('qtdMax: '+qtdMax);
+			console.log('qtdMaxPessoa: '+qtdMaxPessoa);
+			console.log('qtdIngressosJaCadastrados: '+qtdIngressosJaCadastrados);
+			console.log('qtdIngressosPessoa:'+ qtdIngressosPessoa);
 
-				var hash = md5(chave);
-				console.log("Hash: ",hash);
-				ingresso.chave = hash;
+
+			if(qtdMax && qtdIngressosJaCadastrados 
+					&& (qtdIngressosJaCadastrados + ingresso.quantidade) > qtdMax){
+				res.status(400);
+				res.send('A quantidade máxima de ingressos disponibilizadas para o evento foi atingida.');
+			} else if(qtdMaxPessoa && qtdIngressosPessoa 
+					&& (qtdIngressosPessoa + ingresso.quantidade) > qtdMaxPessoa){
+				res.status(400);
+				res.send('A quantidade máxima de ingressos permitido por pessoa foi atingido.');
+			} else {
+				if(!ingresso.chave){
+					//gerar a chave unica do ingresso
+					var chave = moment().get('year') ;
+					chave += moment().get('date');
+					chave += moment().get('hour')
+					chave += moment().get('second')
+					chave += moment().get('millisecond');
+					chave += ingresso.idCliente;
+					chave += ingresso.idEvento;
+					console.log("Chave: ",chave);
+
+					var hash = md5(chave);
+					console.log("Hash: ",hash);
+					ingresso.chave = hash;
+				}
+
+				qrcode(ingresso.chave , function(urlQRCode){
+					ingresso.qrcodeImg = urlQRCode;
+					ingresso.save();
+					res.status(201);
+					res.send(ingresso);
+				});
 			}
-
-			qrcode(ingresso.chave , function(urlQRCode){
-				ingresso.qrcodeImg = urlQRCode;
-				ingresso.save();
-				res.status(201);
-				res.send(ingresso);
-			});
 				
 		}
 
@@ -71,15 +117,32 @@ var ingressoController = function(ingressoModel){
 		
 		console.log(ingresso);
 
-		ingresso.dataBaixa = moment().second(0).millisecond(0).format();
+		if(!ingresso.dataBaixa){
+			ingresso.dataBaixa = moment().second(0).millisecond(0).format();
 
-		ingresso.save(function(err){
-			if(err){
-				res.status(500).send("NOK");
-			} else {
-				res.status(201).send("OK");
-			}
-		});
+			ingresso.save(function(err){
+				if(err){
+					res.status(500).send("NOK");
+				} else {
+					res.status(201).send("OK");
+				}
+			});
+		} else {
+			res.status(500).send("Já foi registrada a baixa desse ingresso");
+		}
+	};
+
+
+
+	var quantidadePorEvento = function(idEvento, req, res){
+		console.log(' ::: Quantidade de Ingressos por Evento');
+		
+		 ingressoModel.count({'idEvento' : idEvento}, function(err, count) {
+		     console.log(count); // this will print the count to console
+		     res.send(""+count);
+		 });
+		
+		
 	};
 
 
@@ -103,7 +166,19 @@ var ingressoController = function(ingressoModel){
 	var listar = function(req, res){
 		console.log(' ::: Listar Ingresso ');
 
-		ingressoModel.find(req.query, function(err, ingressos){
+		var query = {};
+
+		if(req.query){
+			query = req.query;
+
+			if(query.dataBaixa){
+				query.dataBaixa = {
+                    $gte: moment(query.dataBaixa, "DD/MM/YYYY").second(0).millisecond(0).format(),
+                }
+			}	
+		}
+		 
+		ingressoModel.find(query, function(err, ingressos){
 			if(err){
 				res.status(500).send(err);
 			} else {
@@ -122,6 +197,7 @@ var ingressoController = function(ingressoModel){
 	};
 
 	return {
+		quantidadePorEvento : quantidadePorEvento,
 		confirmarEntrada	: confirmarEntrada,
 		listar 		: listar,
 		remover 	: remover,

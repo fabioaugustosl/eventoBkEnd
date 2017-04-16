@@ -29,6 +29,7 @@ var eventoController = function(eventoModel){
 		} else {
 			evento.dataCriacao = moment().second(0).millisecond(0).format();
 			evento.save();
+			
 			res.status(201);
 			res.send(evento);	
 		}
@@ -60,7 +61,7 @@ var eventoController = function(eventoModel){
 			if(err){
 				res.status(500).send(err);
 			} else {
-				res.json(req.evento);
+				res.status(201).send(evento);
 			}
 		});
 	};
@@ -78,10 +79,12 @@ var eventoController = function(eventoModel){
 		
 		console.log(req.evento);
 		req.evento.save(function(err){
+			console.log('call back atu');
 			if(err){
 				res.status(500).send(err);
 			} else {
-				res.json(req.evento);
+				console.log('vai retornar 201');
+				res.status(201).send();
 			}
 		});
 	};
@@ -125,7 +128,6 @@ var eventoController = function(eventoModel){
 			delete query.dataDe;
 			delete query.dataAte;
 				
-			console.log(query);
 		}
 
 		eventoModel.find(query, function(err, eventos){
@@ -140,6 +142,7 @@ var eventoController = function(eventoModel){
 					returnEventos.push(eventoObj);
 				});
 
+				console.log(returnEventos);
 				res.json(returnEventos);
 			}
 		});

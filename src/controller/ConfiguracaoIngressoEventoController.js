@@ -3,7 +3,8 @@ var moment = require('moment');
 var configuracaoIngressoController = function(configuracaoIngressoModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Novo configuracaoIngresso');
+		console.log(' ::: Salvar Nova configuracaoIngresso');
+		console.log(req.body);
 		var configuracaoIngresso = new configuracaoIngressoModel(req.body);
 		
 		console.log(configuracaoIngresso);
@@ -19,10 +20,13 @@ var configuracaoIngressoController = function(configuracaoIngressoModel){
 		}
 
 		if(msgObrigatorio != '') {
+			console.log('IF');
 			res.status(400);
 			res.send(msgObrigatorio);
 		} else {
+			console.log('ELSE');
 			configuracaoIngresso.save();
+			console.log(configuracaoIngresso);
 			res.status(201);
 			res.send(configuracaoIngresso);	
 		}
@@ -46,6 +50,7 @@ var configuracaoIngressoController = function(configuracaoIngressoModel){
 		configuracaoIngresso.tipoIngresso = req.body.tipoIngresso;
 		configuracaoIngresso.preco = req.body.preco;
 		configuracaoIngresso.quantidadeTotal = req.body.quantidadeTotal;
+		configuracaoIngresso.quantidadeMaxPorPessoa = req.body.quantidadeMaxPorPessoa;
 
 		req.configuracaoIngresso.save(function(err){
 			if(err){

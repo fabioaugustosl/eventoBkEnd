@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
 
 var app = express();
 
-var db = mongoose.connect('mongodb://localhost:27018/db_eventos');
+var db = mongoose.connect('mongodb://localhost/db_eventos');
 
 
 var port = process.env.PORT || 3000;
@@ -63,18 +63,22 @@ app.set('views','./src/views');
 //rotas
 
 var eventoRouter = require('./src/routes/EventoRoutes');
-var enderecoRouter = require('./src/routes/EnderecoEventoRoutes');
+var enderecoRouter = require('./src/routes/EnderecoRoutes');
+var enderecoEventoRouter = require('./src/routes/EnderecoEventoRoutes');
 var categoriaRouter = require('./src/routes/CategoriaEventoRoutes');
 var configuracaoIngressoRouter = require('./src/routes/ConfiguracaoIngressoEventoRoutes');
 var ingressoRouter = require('./src/routes/IngressoRoutes');
 var ingressoBaixaRouter = require('./src/routes/IngressoBaixaRoutes');
+var ingressoUtilRouter = require('./src/routes/IngressoUtilRoutes');
 
 app.use('/api/evento/v1', eventoRouter);
 app.use('/api/endereco/v1', enderecoRouter);
+app.use('/api/enderecoEvento/v1', enderecoRouter);
 app.use('/api/categoria/v1', categoriaRouter);
 app.use('/api/configuracaoIngresso/v1', configuracaoIngressoRouter);
 app.use('/api/ingresso/v1', ingressoRouter);
 app.use('/api/ingressoBaixa/v1/', ingressoBaixaRouter);
+app.use('/api/ingressoUtil/v1/', ingressoUtilRouter);
 
 
 app.get('/', function(req, res){

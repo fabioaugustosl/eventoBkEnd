@@ -2,23 +2,14 @@ var express = require('express');
 
 var enderecoModel = require('../models/EnderecoEventoModel');
 
-var enderecoRouter = express.Router();
+var enderecoEventoRouter = express.Router();
 
 var enderecoController = require('../controller/EnderecoEventoController')(enderecoModel);
 
 
-enderecoRouter.route('/')
-		.post(function(req, res){
-			enderecoController.salvarNovo(req, res);
-		})
-		.get(function(req, res){
-			enderecoController.listar(req, res);
-		});
-
-
-enderecoRouter.use('/:enderecoId', function(req, res, next){
+enderecoEventoRouter.use('/:eventoId', function(req, res, next){
 	// esse é nosso middleware
-	enderecoModel.findById(req.params.enderecoId, function(err, endereco){
+	enderecoModel.findOne({ 'idEvento': req.params.eventoId }, function(err, endereco){
 		if(err){
 			res.status(500).send(err);
 		} else if(endereco) {
@@ -31,19 +22,10 @@ enderecoRouter.use('/:enderecoId', function(req, res, next){
 });
 
 
-enderecoRouter.route('/:enderecoId')
+enderecoEventoRouter.route('/:eventoId')
 		.get(function(req, res){
 			res.json(req.endereco);
-		})
-		.put(function(req, res){
-			enderecoController.substituir(req, res);
-		})
-		.patch(function(req, res){
-			enderecoController.atualizar(req, res);
-		})
-		.delete(function(req, res){
-			enderecoController.remover(req, res);
 		});
 		
 
-module.exports = enderecoRouter;
+module.exports = enderecoEventoRouter;
