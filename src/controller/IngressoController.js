@@ -171,10 +171,12 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		if(req.query){
 			query = req.query;
 
+			console.log('data no listar: ',query.dataBaixa);
 			if(query.dataBaixa){
-				query.dataBaixa = {
-                    $gte: moment(query.dataBaixa, "DD/MM/YYYY").second(0).millisecond(0).format(),
-                }
+				var dataQuery =  moment(query.dataBaixa).format("YYYY-MM-DDTHH:mm:ss")
+				console.log('data query: ', dataQuery);
+				
+				query.dataBaixa = { $gte: query.dataBaixa }
 			}	
 		}
 		 
@@ -196,10 +198,46 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		});
 	};
 
+
+	var listarDistribuicaoPorDia = function(donoEvento, req, res){
+		console.log('entrou na dist');
+		ingressoModel.aggregate(
+	    [	{
+	            "$match": {
+	                dono: donoEvento
+	            }
+        	},
+			{ "$group": { 
+		        "_id": 
+	             {
+	               day: {$dayOfMonth: "$dataGeracao"},
+	               month: {$month: "$dataGeracao"}, 
+	               year: {$year: "$dataGeracao"}
+	             }, 
+	             "total": {$sum: "$data"},
+	             "count": {$sum: 1}
+				}},
+	        // Sorting pipeline
+	        { "$sort": { "count": -1 } },
+	        // Optionally limit results
+	        { "$limit": 30 }
+	    ],
+	    function(err,result) {
+	    	console.log(result);
+	    	res.status(201);
+			res.send(result);
+
+
+	       // Result is an array of documents
+	    }
+		);
+	};
+
 	return {
 		quantidadePorEvento : quantidadePorEvento,
 		confirmarEntrada	: confirmarEntrada,
 		listar 		: listar,
+		listarDistribuicaoPorDia : listarDistribuicaoPorDia,
 		remover 	: remover,
 		salvarNovo 	: salvarNovo
 	};
