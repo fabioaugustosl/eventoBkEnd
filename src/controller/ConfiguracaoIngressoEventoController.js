@@ -30,7 +30,6 @@ var configuracaoIngressoController = function(configuracaoIngressoModel){
 			res.status(201);
 			res.send(configuracaoIngresso);	
 		}
-
 	};
 
 

@@ -1,6 +1,8 @@
 
 var md5 = require('md5');
 var moment = require('moment');
+var Promise = require('promise');
+var q = require('q');
 var qrcode = require('../util/QRCodeUtil');
 
 var ingressoController = function(ingressoModel, configuracaoIngressoModel){
@@ -9,7 +11,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		console.log(' ::: Salvar Novo Ingresso ');
 		var ingresso = new ingressoModel(req.body);
 
-		var configuracaoIngresso = new configuracaoIngressoModel();
+		var configuracaoIngresso = null;
 
 		console.log(ingresso);
 		var msgObrigatorio = '';
@@ -36,29 +38,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 			var qtdMax;
 			var qtdMaxPessoa;
 			var qtdIngressosJaCadastrados;
-			var qtdIngressosPessoa;
-
-			/*configuracaoIngresso.findOne({'idEvento': req.body.idEvento}, function(err, configIngressoEvento){
-				console.log('configuração do ingresso para esse evento: ',configIngressoEvento);
-
-				if(!err){
-					qtdMax = configIngressoEvento.quantidadeTotal;
-					qtdMaxPessoa = configIngressoEvento.quantidadeMaxPorPessoa;
-				}
-			});
-*/
-			ingressoModel.where({ 'idEvento': ingresso.idEvento }).count(function (err, count) {
-				if(!err){
-			  		qtdIngressosJaCadastrados = count;
-				}
-			});
-
-			ingressoModel.where({ 'idCliente': ingresso.idCliente }).count(function (err, count) {
-				if(!err){
-			  		qtdIngressosPessoa = count;
-				}
-			});
-
+			var qtdIngressosPessoaNaConfiguracao;
 
 			if(!ingresso.quantidade) {
 				ingresso.quantidade = 1;
@@ -66,14 +46,166 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 			if(!ingresso.valorPG) {
 				ingresso.valorPG = 0;
 			} 
+
+			var recuperarConfiguracaoDoIngresso = function() {
+			  	var deferred = q.defer();
+
+			  	configuracaoIngressoModel.findById(ingresso.idConfiguracao, function(err, configuracao){
+					if(!err){
+						deferred.resolve(configuracao);
+					}
+				});
+
+			  	return deferred.promise;
+			};
+
+			var recuperarMaxIngressosEvento = function() {
+			  var deferred = q.defer();
+			  
+			  ingressoModel.where({ 'idEvento': ingresso.idEvento , 'idConfiguracao': ingresso.idConfiguracao}).count(function (err, count) {
+				console.log('callback do count idEvento :', count );
+					if(!err){
+				  		
+				  		deferred.resolve(count);
+					}
+				});
+
+			  return deferred.promise;
+			};
+
+			var recuperarMaxIngressosPessoa = function() {
+			  var deferred = q.defer();
+			  
+			  ingressoModel.where({ 'idCliente': ingresso.idCliente , 'idConfiguracao': ingresso.idConfiguracao}).count(function (err, count) {
+					console.log('callback do count idCliente :', count );
+					if(!err){
+				  		deferred.resolve(count);
+					}
+				});
+
+			  return deferred.promise;
+			};
+
+
+			var salvarNovoIngressoDefinitivamente = function() {
+				qtdMax = configuracaoIngresso.quantidadeTotal;
+				qtdMaxPessoa = configuracaoIngresso.quantidadeMaxPorPessoa;
+				
+				console.log('qtdMax: '+qtdMax);
+				console.log('qtdMaxPessoa: '+qtdMaxPessoa);
+				console.log('qtdIngressosJaCadastrados: '+qtdIngressosJaCadastrados);
+				console.log('qtdIngressosPessoa:'+ qtdIngressosPessoaNaConfiguracao);
+
+				if(qtdMax && qtdIngressosJaCadastrados 
+						&& (qtdIngressosJaCadastrados + ingresso.quantidade) > qtdMax){
+					res.status(400);
+					res.send('A quantidade máxima de ingressos disponibilizadas para o evento na categoria '+configuracaoIngresso.tipoIngresso+' foi atingida.');
+				} else if(qtdMaxPessoa && qtdIngressosPessoaNaConfiguracao 
+						&& (qtdIngressosPessoaNaConfiguracao + ingresso.quantidade) > qtdMaxPessoa){
+					res.status(400);
+					res.send('A quantidade máxima de ingressos permitido por pessoa na categoria '+configuracaoIngresso.tipoIngresso+' foi atingida.');
+				} else {
+					if(!ingresso.chave){
+						//gerar a chave unica do ingresso
+						var chave = moment().get('year') ;
+						chave += moment().get('date');
+						chave += moment().get('hour')
+						chave += moment().get('second')
+						chave += moment().get('millisecond');
+						chave += ingresso.idCliente;
+						chave += ingresso.idEvento;
+						console.log("Chave: ",chave);
+
+						var hash = md5(chave);
+						console.log("Hash: ",hash);
+						ingresso.chave = hash;
+					}
+
+					qrcode(ingresso.chave , function(urlQRCode){
+						ingresso.qrcodeImg = urlQRCode;
+						ingresso.save();
+						res.status(201);
+						res.send(ingresso);
+					});
+				}
+			};
+
+
+			recuperarConfiguracaoDoIngresso().then(function(configuracao) {
+				console.log('recuperou a configuracao do evento: ', configuracao);
+				configuracaoIngresso  = configuracao;
+
+				recuperarMaxIngressosEvento().then(function(total) {
+					console.log('recuperou o total do evento', total);
+	 				qtdIngressosJaCadastrados = total;
+	 		
+		 			recuperarMaxIngressosPessoa().then(function(total) {
+		 				console.log('recuperou o total por pessoa', total);
+						qtdIngressosPessoaNaConfiguracao = total;
+
+						salvarNovoIngressoDefinitivamente();
+
+		 			});
+
+				});
+			});
+
+		/*	var recuperarMaxIngressosEvento = function(){
 			
-			console.log('qtdMax: '+qtdMax);
-			console.log('qtdMaxPessoa: '+qtdMaxPessoa);
-			console.log('qtdIngressosJaCadastrados: '+qtdIngressosJaCadastrados);
-			console.log('qtdIngressosPessoa:'+ qtdIngressosPessoa);
+
+				ingressoModel.where({ 'idEvento': ingresso.idEvento }).count(function (err, count) {
+					console.log('callback do count idEvento :', count );
+					if(!err){
+				  		qtdIngressosJaCadastrados = count;
+				  		deferred.resolve(count);
+					}
+				});
+
+				return deferred.promise;
+
+			};
+*/
+			/*var recuperarMaxIngressosPessoa = function() {
+				ingressoModel.where({ 'idCliente': ingresso.idCliente , 'idConfiguracao': ingresso.idConfiguracao}).count(function (err, count) {
+					console.log('callback do count idCliente :', count );
+					if(!err){
+				  		qtdIngressosPessoaNaConfiguracao = count;
+					}
+				});
+
+			};
+*/
+
+			
+
+			
+	/*		when(recuperarMaxIngressosEvento, function() {
+	  // callback, executed on successful promise resolution or if maybePromise is not a promise but a value
+	}, function() {
+	  // errback, executed on rejection
+	}, function() {
+	  // progressback, executed if the promise has progress to report
+	});
+*/
+		/*	recuperarMaxIngressosEvento().then(function(val) {
+			  console.log('resolved', val);
+			}, function(err) {
+			  // Will receive rejections from doSomethingAsync or bubbled from asyncHelper
+			  console.log('error', err);
+			}, function() {
+			  console.log('vai pro proximo', err);
+			});
+
+/**/
+
+			
+			// console.log('qtdMax: '+qtdMax);
+			// console.log('qtdMaxPessoa: '+qtdMaxPessoa);
+			// console.log('qtdIngressosJaCadastrados: '+qtdIngressosJaCadastrados);
+			// console.log('qtdIngressosPessoa:'+ qtdIngressosPessoa);
 
 
-			if(qtdMax && qtdIngressosJaCadastrados 
+			/*if(qtdMax && qtdIngressosJaCadastrados 
 					&& (qtdIngressosJaCadastrados + ingresso.quantidade) > qtdMax){
 				res.status(400);
 				res.send('A quantidade máxima de ingressos disponibilizadas para o evento foi atingida.');
@@ -104,7 +236,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 					res.status(201);
 					res.send(ingresso);
 				});
-			}
+			}*/
 				
 		}
 
@@ -218,7 +350,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	             "count": {$sum: 1}
 				}},
 	        // Sorting pipeline
-	        { "$sort": { "count": -1 } },
+	        { "$sort": { "_id": 1 } },
 	        // Optionally limit results
 	        { "$limit": 30 }
 	    ],
@@ -233,11 +365,42 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		);
 	};
 
+
+	var listarDistribuicaoPorConfiguracao = function(donoEvento, req, res){
+		console.log('entrou na dist por categoria');
+		ingressoModel.aggregate(
+	    [	{
+	            "$match": {
+	                dono: donoEvento
+	            }
+        	},
+			{ "$group": { 
+		        "_id": "$idConfiguracao",
+	            "total": {$sum: 1}
+			}},
+	        // Sorting pipeline
+	        { "$sort": { "_id": 1 } },
+	        // Optionally limit results
+	        { "$limit": 30 }
+	    ],
+	    function(err,result) {
+	    	console.log(result);
+	    	res.status(201);
+			res.send(result);
+
+
+	       // Result is an array of documents
+	    }
+		);
+	};
+
+
 	return {
 		quantidadePorEvento : quantidadePorEvento,
 		confirmarEntrada	: confirmarEntrada,
 		listar 		: listar,
 		listarDistribuicaoPorDia : listarDistribuicaoPorDia,
+		listarDistribuicaoPorConfiguracao : listarDistribuicaoPorConfiguracao,
 		remover 	: remover,
 		salvarNovo 	: salvarNovo
 	};

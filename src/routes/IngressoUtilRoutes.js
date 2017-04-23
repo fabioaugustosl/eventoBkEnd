@@ -20,6 +20,11 @@ ingressoUtilRouter.route('/distribuicao/:dono')
 			ingressoController.listarDistribuicaoPorDia(req.params.dono,req, res);
 		});
 
+ingressoUtilRouter.route('/distribuicaoPorConfiguracao/:dono')
+		.get(function(req, res){
+			console.log('chegou na distribuicao por categoria');
+			ingressoController.listarDistribuicaoPorConfiguracao(req.params.dono,req, res);
+		});
 
 
 
