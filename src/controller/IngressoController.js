@@ -105,6 +105,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 					res.status(400);
 					res.send('A quantidade máxima de ingressos permitido por pessoa na categoria '+configuracaoIngresso.tipoIngresso+' foi atingida.');
 				} else {
+					console.log('Chave ingresso: ', ingresso.chave);
 					if(!ingresso.chave){
 						//gerar a chave unica do ingresso
 						var chave = moment().get('year') ;
@@ -149,94 +150,6 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 
 				});
 			});
-
-		/*	var recuperarMaxIngressosEvento = function(){
-			
-
-				ingressoModel.where({ 'idEvento': ingresso.idEvento }).count(function (err, count) {
-					console.log('callback do count idEvento :', count );
-					if(!err){
-				  		qtdIngressosJaCadastrados = count;
-				  		deferred.resolve(count);
-					}
-				});
-
-				return deferred.promise;
-
-			};
-*/
-			/*var recuperarMaxIngressosPessoa = function() {
-				ingressoModel.where({ 'idCliente': ingresso.idCliente , 'idConfiguracao': ingresso.idConfiguracao}).count(function (err, count) {
-					console.log('callback do count idCliente :', count );
-					if(!err){
-				  		qtdIngressosPessoaNaConfiguracao = count;
-					}
-				});
-
-			};
-*/
-
-			
-
-			
-	/*		when(recuperarMaxIngressosEvento, function() {
-	  // callback, executed on successful promise resolution or if maybePromise is not a promise but a value
-	}, function() {
-	  // errback, executed on rejection
-	}, function() {
-	  // progressback, executed if the promise has progress to report
-	});
-*/
-		/*	recuperarMaxIngressosEvento().then(function(val) {
-			  console.log('resolved', val);
-			}, function(err) {
-			  // Will receive rejections from doSomethingAsync or bubbled from asyncHelper
-			  console.log('error', err);
-			}, function() {
-			  console.log('vai pro proximo', err);
-			});
-
-/**/
-
-			
-			// console.log('qtdMax: '+qtdMax);
-			// console.log('qtdMaxPessoa: '+qtdMaxPessoa);
-			// console.log('qtdIngressosJaCadastrados: '+qtdIngressosJaCadastrados);
-			// console.log('qtdIngressosPessoa:'+ qtdIngressosPessoa);
-
-
-			/*if(qtdMax && qtdIngressosJaCadastrados 
-					&& (qtdIngressosJaCadastrados + ingresso.quantidade) > qtdMax){
-				res.status(400);
-				res.send('A quantidade máxima de ingressos disponibilizadas para o evento foi atingida.');
-			} else if(qtdMaxPessoa && qtdIngressosPessoa 
-					&& (qtdIngressosPessoa + ingresso.quantidade) > qtdMaxPessoa){
-				res.status(400);
-				res.send('A quantidade máxima de ingressos permitido por pessoa foi atingido.');
-			} else {
-				if(!ingresso.chave){
-					//gerar a chave unica do ingresso
-					var chave = moment().get('year') ;
-					chave += moment().get('date');
-					chave += moment().get('hour')
-					chave += moment().get('second')
-					chave += moment().get('millisecond');
-					chave += ingresso.idCliente;
-					chave += ingresso.idEvento;
-					console.log("Chave: ",chave);
-
-					var hash = md5(chave);
-					console.log("Hash: ",hash);
-					ingresso.chave = hash;
-				}
-
-				qrcode(ingresso.chave , function(urlQRCode){
-					ingresso.qrcodeImg = urlQRCode;
-					ingresso.save();
-					res.status(201);
-					res.send(ingresso);
-				});
-			}*/
 				
 		}
 
@@ -250,7 +163,8 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		console.log(ingresso);
 
 		if(!ingresso.dataBaixa){
-			ingresso.dataBaixa = moment().second(0).millisecond(0).format();
+			ingresso.dataBaixa = new Date();		
+			console.log('data que vai rolar a baixa 2: ', ingresso.dataBaixa);
 
 			ingresso.save(function(err){
 				if(err){
@@ -272,9 +186,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		 ingressoModel.count({'idEvento' : idEvento}, function(err, count) {
 		     console.log(count); // this will print the count to console
 		     res.send(""+count);
-		 });
-		
-		
+		 });	
 	};
 
 
@@ -395,12 +307,49 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	};
 
 
+	
+	var listarEntradaEventoPorDia = function(idEventoAtual, req, res){
+		console.log('entrou na listagem de entradas por evento');
+		ingressoModel.aggregate(
+	    [	{
+	            "$match": {
+	                idEvento: idEventoAtual,
+	                dataBaixa : { $ne: null }
+	            }
+        	},
+			{ "$group": { 
+		        "_id": 
+	             {
+	               	day: {$dayOfMonth: "$dataBaixa"},
+	               	hour: {$hour: "$dataBaixa"}
+	               	/*,
+	       			minutes: { $minute: "$dataBaixa" },
+	       			seconds: { $second: "$dataBaixa" }*/
+	             }, 
+	             "total": {$sum: 1}
+			}},
+	        // Sorting pipeline
+	        { "$sort": { "_id": 1 } },
+	        // Optionally limit results
+	        { "$limit": 99 }
+	    ],
+	    function(err,result) {
+	    	console.log(result);
+	    	res.status(201);
+			res.send(result);
+
+	       // Result is an array of documents
+	    }
+		);
+	};
+
 	return {
 		quantidadePorEvento : quantidadePorEvento,
 		confirmarEntrada	: confirmarEntrada,
 		listar 		: listar,
 		listarDistribuicaoPorDia : listarDistribuicaoPorDia,
 		listarDistribuicaoPorConfiguracao : listarDistribuicaoPorConfiguracao,
+		listarEntradaEventoPorDia : listarEntradaEventoPorDia, 
 		remover 	: remover,
 		salvarNovo 	: salvarNovo
 	};

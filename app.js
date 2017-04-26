@@ -63,7 +63,7 @@ app.set('views','./src/views');
 //rotas
 
 var eventoRouter = require('./src/routes/EventoRoutes');
-var enderecoRouter = require('./src/routes/EnderecoRoutes');
+var enderecoRouter = require('./src/routes/EnderecoEventoRoutes');
 var enderecoEventoRouter = require('./src/routes/EnderecoEventoRoutes');
 var categoriaRouter = require('./src/routes/CategoriaEventoRoutes');
 var configuracaoIngressoRouter = require('./src/routes/ConfiguracaoIngressoEventoRoutes');

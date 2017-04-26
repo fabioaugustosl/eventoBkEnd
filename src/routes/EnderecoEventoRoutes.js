@@ -8,6 +8,7 @@ var enderecoController = require('../controller/EnderecoEventoController')(ender
 
 
 enderecoEventoRouter.use('/:eventoId', function(req, res, next){
+	console.log('chegou no middleware endereco ');
 	// esse é nosso middleware
 	enderecoModel.findOne({ 'idEvento': req.params.eventoId }, function(err, endereco){
 		if(err){
@@ -24,6 +25,7 @@ enderecoEventoRouter.use('/:eventoId', function(req, res, next){
 
 enderecoEventoRouter.route('/:eventoId')
 		.get(function(req, res){
+			console('chegouj no get endereco	');
 			res.json(req.endereco);
 		});
 		
