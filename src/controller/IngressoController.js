@@ -160,11 +160,11 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		console.log(' ::: confirmarEntrada Ingresso - BAIXA');
 		//var ingresso = req.ingresso; // new eventoModel(req.body);
 		
-		console.log(ingresso);
+		
 
 		if(!ingresso.dataBaixa){
-			ingresso.dataBaixa = new Date();		
-			console.log('data que vai rolar a baixa 2: ', ingresso.dataBaixa);
+			ingresso.dataBaixa = moment().utc(new Date()).format();		
+			console.log('data que vai rolar a baixa : ', ingresso);
 
 			ingresso.save(function(err){
 				if(err){
@@ -210,36 +210,73 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	var listar = function(req, res){
 		console.log(' ::: Listar Ingresso ');
 
-		var query = {};
+		var query = [];
 
 		if(req.query){
-			query = req.query;
 
-			console.log('data no listar: ',query.dataBaixa);
+			if(req.query.idEvento){
+				query.push({idEvento : req.query.idEvento});
+			}
+
+			if(req.query.idConfiguracao){
+				query.push({idConfiguracao : req.query.idConfiguracao});
+			}
+			
+			if(req.query.dono){
+				query.push({dono : req.query.dono});
+			}
+
+			if(req.query.docCliente1){
+				query.push({docCliente1 : req.query.docCliente1});
+			}
+			
+			if(req.query.docCliente2){
+				query.push({docCliente2 : req.query.docCliente2});
+			}
+
+			if(req.query.chave){
+				query.push({chave : req.query.chave});
+			}
+
+			if(req.query.nomeCliente){
+				query.push({nomeCliente : RegExp(req.query.nomeCliente, "i") });
+			}
+			
+			/*console.log('data no listar: ',query.dataBaixa);
 			if(query.dataBaixa){
 				var dataQuery =  moment(query.dataBaixa).format("YYYY-MM-DDTHH:mm:ss")
 				console.log('data query: ', dataQuery);
 				
 				query.dataBaixa = { $gte: query.dataBaixa }
-			}	
+			}*/	
 		}
 		 
-		ingressoModel.find(query, function(err, ingressos){
-			if(err){
-				res.status(500).send(err);
-			} else {
-				var returningressos = [];
-				ingressos.forEach(function(element, index, array){
-					var ingressoObj = element.toJSON();
-					ingressoObj.links = {};
-					ingressoObj.links.self = 'http://'+req.headers.host + '/api/ingresso/v1/' + ingressoObj._id;
-					ingressoObj.links.qrcodeImg = "<img src='"+ingressoObj.qrcodeImg+"' alt='"+ingressoObj.chave+"' />";
-					returningressos.push(ingressoObj);
-				});
+		console.log(query);
+		var queryFinal = {};
+		if(query && query.length > 0){
+			queryFinal = { $and: query };
+		}
+		
+		ingressoModel.find(
 
-				res.json(returningressos);
-			}
-		});
+				queryFinal
+  
+			  , function(err, ingressos){
+					if(err){
+						res.status(500).send(err);
+					} else {
+						var returningressos = [];
+						ingressos.forEach(function(element, index, array){
+							var ingressoObj = element.toJSON();
+							ingressoObj.links = {};
+							ingressoObj.links.self = 'http://'+req.headers.host + '/api/ingresso/v1/' + ingressoObj._id;
+							ingressoObj.links.qrcodeImg = "<img src='"+ingressoObj.qrcodeImg+"' alt='"+ingressoObj.chave+"' />";
+							returningressos.push(ingressoObj);
+						});
+
+						res.json(returningressos);
+					}
+				});
 	};
 
 
@@ -262,7 +299,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	             "count": {$sum: 1}
 				}},
 	        // Sorting pipeline
-	        { "$sort": { "_id": 1 } },
+	        { "$sort": { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
 	        // Optionally limit results
 	        { "$limit": 30 }
 	    ],

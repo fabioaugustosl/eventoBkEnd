@@ -27,7 +27,13 @@ var eventoController = function(eventoModel){
 			res.status(400);
 			res.send(msgObrigatorio);
 		} else {
-			evento.dataCriacao = moment().second(0).millisecond(0).format();
+			evento.dataCriacao = moment().second(0).millisecond(0).utc().format();
+
+			if(evento.horario){
+				var hora = evento.horario.split(":");
+				evento.data = moment(evento.data).hour(hora[0]).minute(hora[1]).utc().format();
+			}
+
 			evento.save();
 			
 			res.status(201);
