@@ -71,6 +71,7 @@ var ingressoRouter = require('./src/routes/IngressoRoutes');
 var ingressoBaixaRouter = require('./src/routes/IngressoBaixaRoutes');
 var ingressoUtilRouter = require('./src/routes/IngressoUtilRoutes');
 var logRouter = require('./src/routes/LogRoutes');
+var ingressoValidoRouter = require('./src/routes/IngressoValidoRoutes');
 
 app.use('/api/evento/v1', eventoRouter);
 app.use('/api/endereco/v1', enderecoRouter);
@@ -81,6 +82,7 @@ app.use('/api/ingresso/v1', ingressoRouter);
 app.use('/api/ingressoBaixa/v1/', ingressoBaixaRouter);
 app.use('/api/ingressoUtil/v1/', ingressoUtilRouter);
 app.use('/api/log/v1/', logRouter);
+app.use('/api/ingressoValido/v1/', ingressoValidoRouter);
 
 
 app.get('/', function(req, res){

@@ -87,7 +87,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 			};
 
 
-			var salvarNovoIngressoDefinitivamente = function() {
+			var salvarNovoIngresso = function() {
 				qtdMax = configuracaoIngresso.quantidadeTotal;
 				qtdMaxPessoa = configuracaoIngresso.quantidadeMaxPorPessoa;
 				
@@ -98,12 +98,14 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 
 				if(qtdMax && qtdIngressosJaCadastrados 
 						&& (qtdIngressosJaCadastrados + ingresso.quantidade) > qtdMax){
+					console.log('ERRO: A quantidade máxima de ingressos disponibilizadas para o evento na categoria');
 					res.status(400);
-					res.send('A quantidade máxima de ingressos disponibilizadas para o evento na categoria '+configuracaoIngresso.tipoIngresso+' foi atingida.');
+					res.end('A quantidade máxima de ingressos disponibilizadas para o evento na categoria '+configuracaoIngresso.tipoIngresso+' foi atingida.');
 				} else if(qtdMaxPessoa && qtdIngressosPessoaNaConfiguracao 
 						&& (qtdIngressosPessoaNaConfiguracao + ingresso.quantidade) > qtdMaxPessoa){
+					console.log('ERRO: A quantidade máxima de ingressos permitido por pessoa na categoria ');
 					res.status(400);
-					res.send('A quantidade máxima de ingressos permitido por pessoa na categoria '+configuracaoIngresso.tipoIngresso+' foi atingida.');
+					res.end('A quantidade máxima de ingressos permitido por pessoa na categoria '+configuracaoIngresso.tipoIngresso+' foi atingida.');
 				} else {
 					console.log('Chave ingresso: ', ingresso.chave);
 					if(!ingresso.chave){
@@ -120,15 +122,43 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 						var hash = md5(chave);
 						console.log("Hash: ",hash);
 						ingresso.chave = hash;
-					}
 
-					qrcode(ingresso.chave , function(urlQRCode){
+						// se não tinha codigo pre-estabelecido salva direto.
+						salvarNovoIngressoDefinitivamente(ingresso);
+					} else {
+						// se já tem codigo preenchido verifica se o codigo já foi usado ... se não salva
+						ingressoModel.where({ 'chave': ingresso.chave}).count(function (err, count) {
+							
+							if(err){
+								console.log("ERRO: erro louco ao tentar validar se o código do ingresso já foi utilizado.");
+						  		res.status(402).end(err);
+							} else {
+								if(count > 0){
+									console.log("ERRO: código "+ingresso.chave+" do ingresso já foi utilizado.");
+									res.status(403);
+									res.end('O ingresso códido '+ingresso.chave+' já foi utilizado anteriormente.');
+								} else {
+									salvarNovoIngressoDefinitivamente(ingresso);
+								}	
+							}
+							
+						});
+
+					}
+					
+				}
+			};
+
+
+			var salvarNovoIngressoDefinitivamente = function(ingresso){
+				qrcode(ingresso.chave , function(urlQRCode){
+						console.log('ENTROU NO SALVAR DEFINITIVAMENTE');
 						ingresso.qrcodeImg = urlQRCode;
 						ingresso.save();
+						console.log('salvou ');
 						res.status(201);
 						res.send(ingresso);
 					});
-				}
 			};
 
 
@@ -144,7 +174,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		 				console.log('recuperou o total por pessoa', total);
 						qtdIngressosPessoaNaConfiguracao = total;
 
-						salvarNovoIngressoDefinitivamente();
+						salvarNovoIngresso();
 
 		 			});
 

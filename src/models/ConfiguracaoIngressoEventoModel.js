@@ -5,6 +5,7 @@ var configuracaoIngressoEventoModel = new Schema({
 	tipoIngresso:{ type:String},  /*unico, meia-entrada, vip, etc*/
 	preco:{ type:Number},
 	quantidadeTotal:{ type:Number},
+	perfilPadrao:[String],
 	quantidadeMaxPorPessoa:{ type:Number},
 	dataInicioVendas: {type: Date},
 	dataTerminoVendas: {type: Date}
