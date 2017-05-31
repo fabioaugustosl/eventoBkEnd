@@ -373,6 +373,72 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		);
 	};
 
+	
+	var listarEntradaEventoPorCategoria = function(idEventoAtual, req, res){
+		console.log('entrou na listagem de entradas por evento por categoria');
+		ingressoModel.aggregate(
+		    [	{
+		            "$match": {
+		                idEvento: idEventoAtual,
+		                dataBaixa : { $ne: null }
+		            }
+	        	},
+				{ "$group": { 
+			        "_id": {  configuracao: "$idConfiguracao" , clientesUnicos:  "$idCliente"  },
+			        //"cliente": { $sum: "$idCliente" },
+		            "total": {$sum: 1}
+				}},
+		        // Sorting pipeline
+		        { "$sort": { "_id": 1 } },
+		        // Optionally limit results
+		        { "$limit": 99 }
+		    ],
+		    function(err,result) {
+		    	
+		    	var retorno = [];
+		    	var retornoTotalIngressos = [];
+
+		    	//console.log(result);
+		    	for (i = 0; i < result.length; i++) { 
+		        	var dado = result[i];
+		        	//console.log(dado);
+		        	var qtdCateg = retorno[dado._id.configuracao];
+		        	var qtdTotalCateg = retornoTotalIngressos[dado._id.configuracao];
+		        	
+		        	if(!qtdCateg){
+		        		qtdCateg = 0; 
+		        	}
+		        	if(!qtdTotalCateg){
+		        		qtdTotalCateg = 0; 
+		        	}
+		        	qtdCateg++;
+		        	qtdTotalCateg = qtdTotalCateg+dado.total;
+		        	
+		        	retorno[dado._id.configuracao] = qtdCateg;
+		        	retornoTotalIngressos[dado._id.configuracao] = qtdTotalCateg;
+		    	}
+
+		    	var retornoDoidao = [];
+		    	if(retorno){
+		    		var jsonObjetoRet = {};
+		    		var cont = 0;
+		    		for (var key in retorno) {
+					    var value = retorno[key];
+					    jsonObjetoRet.categoria = key;
+					    jsonObjetoRet.totaUnico = value;
+					    jsonObjetoRet.totalIngressos = retornoTotalIngressos[key];
+						retornoDoidao[cont++] = jsonObjetoRet;
+					}
+		    	}
+
+		    	res.status(201);
+				res.send(retornoDoidao);
+
+		       // Result is an array of documents
+		    }
+		);
+	};
+
 
 	
 	var listarEntradaEventoPorDia = function(idEventoAtual, req, res){
@@ -417,6 +483,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		listarDistribuicaoPorDia : listarDistribuicaoPorDia,
 		listarDistribuicaoPorConfiguracao : listarDistribuicaoPorConfiguracao,
 		listarEntradaEventoPorDia : listarEntradaEventoPorDia, 
+		listarEntradaEventoPorCategoria : listarEntradaEventoPorCategoria,
 		remover 	: remover,
 		salvarNovo 	: salvarNovo
 	};

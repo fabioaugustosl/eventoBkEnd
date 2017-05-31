@@ -32,5 +32,10 @@ ingressoUtilRouter.route('/entradasEvento/:idEvento')
 			ingressoController.listarEntradaEventoPorDia(req.params.idEvento,req, res);
 		});
 
+ingressoUtilRouter.route('/entradasPorCategoria/:idEvento')
+		.get(function(req, res){
+			ingressoController.listarEntradaEventoPorCategoria(req.params.idEvento,req, res);
+		});
+
 
 module.exports = ingressoUtilRouter;
