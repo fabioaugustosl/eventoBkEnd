@@ -271,6 +271,10 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 			if(req.query.nomeCliente){
 				query.push({nomeCliente : RegExp(req.query.nomeCliente, "i") });
 			}
+
+			if(req.query.responsavelDistribuicao){
+				query.push({responsavelDistribuicao : RegExp(req.query.responsavelDistribuicao, "i") });
+			}			
 			
 			/*console.log('data no listar: ',query.dataBaixa);
 			if(query.dataBaixa){

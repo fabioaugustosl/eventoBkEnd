@@ -17,7 +17,9 @@ var ingressoModel = new Schema({
 	chave : {type:String},
 	qrcodeImg : {type:String},
 	dataBaixa : {type: Date},
-	guicheBaixa : {type: String}
+	guicheBaixa : {type: String},
+	responsavelBaixa : {type: String},
+	responsavelDistribuicao : {type: String}
 });
 
 module.exports = mongoose.model('Ingresso', ingressoModel);
