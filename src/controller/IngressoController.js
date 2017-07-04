@@ -314,6 +314,35 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	};
 
 
+
+	var listarPaginado = function(numMaxRegistros, pagina, req, res){
+		console.log(' ::: Listar Ingresso paginado ',numMaxRegistros," - ", pagina);
+		var skipVar = (pagina *numMaxRegistros);
+	
+		ingressoModel.find(req.query).sort('chave')
+				.limit(numMaxRegistros)
+    			.skip(skipVar)
+    			
+    			.exec( function(err, ingressos){
+					if(err){
+						res.status(500).send(err);
+					} else {
+						var returningressos = [];
+						ingressos.forEach(function(element, index, array){
+							var ingressoObj = element.toJSON();
+							ingressoObj.links = {};
+							ingressoObj.links.self = 'http://'+req.headers.host + '/api/ingresso/v1/' + ingressoObj._id;
+							ingressoObj.links.qrcodeImg = "<img src='"+ingressoObj.qrcodeImg+"' alt='"+ingressoObj.chave+"' />";
+							returningressos.push(ingressoObj);
+						});
+
+						res.json(returningressos);
+					}
+				}); 
+	};
+
+
+
 	var listarDistribuicaoPorDia = function(donoEvento, req, res){
 		console.log('entrou na dist');
 		ingressoModel.aggregate(
@@ -484,6 +513,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		quantidadePorEvento : quantidadePorEvento,
 		confirmarEntrada	: confirmarEntrada,
 		listar 		: listar,
+		listarPaginado : listarPaginado,
 		listarDistribuicaoPorDia : listarDistribuicaoPorDia,
 		listarDistribuicaoPorConfiguracao : listarDistribuicaoPorConfiguracao,
 		listarEntradaEventoPorDia : listarEntradaEventoPorDia, 

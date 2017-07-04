@@ -37,5 +37,9 @@ ingressoUtilRouter.route('/entradasPorCategoria/:idEvento')
 			ingressoController.listarEntradaEventoPorCategoria(req.params.idEvento,req, res);
 		});
 
+ingressoUtilRouter.route('/listarPaginado/:numMaxRegisros/:pagina')
+		.get(function(req, res){
+			ingressoController.listarPaginado(req.params.numMaxRegisros,req.params.pagina,req, res);
+		});
 
 module.exports = ingressoUtilRouter;
