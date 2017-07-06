@@ -274,7 +274,12 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 
 			if(req.query.responsavelDistribuicao){
 				query.push({responsavelDistribuicao : RegExp(req.query.responsavelDistribuicao, "i") });
-			}			
+			}
+
+			if(req.query.dataGeracao){
+				query.push({dataGeracao : moment(query.data, "DD/MM/YYYY").format() });
+			}
+						
 			
 			/*console.log('data no listar: ',query.dataBaixa);
 			if(query.dataBaixa){
@@ -290,12 +295,13 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		if(query && query.length > 0){
 			queryFinal = { $and: query };
 		}
-		
-		ingressoModel.find(
 
-				queryFinal
-  
-			  , function(err, ingressos){
+		var numMaxRegistros = 300;
+		
+		ingressoModel.find(	queryFinal)
+				.sort({ "dataGeracao": -1 })
+				.limit(numMaxRegistros)
+    			.exec(function(err, ingressos){
 					if(err){
 						res.status(500).send(err);
 					} else {
@@ -363,8 +369,9 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 				}},
 	        // Sorting pipeline
 	        { "$sort": { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+	        //{"$sort": { "dataGeracao": 1} },
 	        // Optionally limit results
-	        { "$limit": 30 }
+	        { "$limit": 90 }
 	    ],
 	    function(err,result) {
 	    	console.log(result);
@@ -391,7 +398,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	            "total": {$sum: 1}
 			}},
 	        // Sorting pipeline
-	        { "$sort": { "_id": 1 } },
+	        { "$sort": { "dataGeracao": -1 } },
 	        // Optionally limit results
 	        { "$limit": 30 }
 	    ],
@@ -495,7 +502,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	             "total": {$sum: 1}
 			}},
 	        // Sorting pipeline
-	        { "$sort": { "_id": 1 } },
+	        { "$sort": { "dataBaixa": 1 } },
 	        // Optionally limit results
 	        { "$limit": 99 }
 	    ],
