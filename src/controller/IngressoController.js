@@ -516,6 +516,28 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		);
 	};
 
+
+	var atualizar = function(req, res){
+		console.log(' ::: Atualizar ingresso');
+		if(req.body._id){
+			delete req.body._id;
+		}
+
+		for(var p in req.body){
+			req.ingresso[p] = req.body[p];	
+		}
+		
+		console.log(req.ingresso);
+		req.ingresso.save(function(err){
+			if(err){
+				res.status(500).send(err);
+			} else {
+				res.json(req.ingresso);
+			}
+		});
+	};
+
+
 	return {
 		quantidadePorEvento : quantidadePorEvento,
 		confirmarEntrada	: confirmarEntrada,
@@ -526,6 +548,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		listarEntradaEventoPorDia : listarEntradaEventoPorDia, 
 		listarEntradaEventoPorCategoria : listarEntradaEventoPorCategoria,
 		remover 	: remover,
+		atualizar : atualizar,
 		salvarNovo 	: salvarNovo
 	};
 

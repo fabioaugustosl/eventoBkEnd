@@ -41,6 +41,9 @@ ingressoRouter.route('/:ingressoId')
 		.get(function(req, res){
 			res.json(req.ingresso);
 		})
+		.patch(function(req, res){
+			ingressoController.atualizar(req, res);  
+		})
 		.delete(function(req, res){
 			ingressoController.remover(req, res);
 		});
