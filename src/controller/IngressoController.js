@@ -264,6 +264,10 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 				query.push({docCliente2 : req.query.docCliente2});
 			}
 
+			if(req.query.idCliente){
+				query.push({idCliente : req.query.idCliente});
+			}
+
 			if(req.query.chave){
 				query.push({chave : req.query.chave});
 			}
@@ -351,10 +355,12 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 
 	var listarDistribuicaoPorDia = function(donoEvento, req, res){
 		console.log('entrou na dist');
+		var arrayIdsConfigNao = ["5942f2bb7c86f30035563cae", "5942f2d97c86f30035563caf"];
 		ingressoModel.aggregate(
 	    [	{
 	            "$match": {
 	                dono: donoEvento
+	                ,idConfiguracao : { "$nin": arrayIdsConfigNao } 
 	            }
         	},
 			{ "$group": { 
