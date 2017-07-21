@@ -41,6 +41,13 @@ ingressoRouter.route('/:ingressoId')
 			//});
 
 			
+		}).post(function(req, res){
+			console.log('chegou post baixa - POST');
+			console.log(req.params);
+			console.log(req.params.ingressoId);
+			console.log('vai chamar o baixa');
+			ingressoController.confirmarEntrada(req.ingresso,req, res);
+			
 		});
 
 module.exports = ingressoRouter;
