@@ -191,8 +191,11 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		//var ingresso = req.ingresso; // new eventoModel(req.body);
 		
 		
-
-		if(!ingresso.dataBaixa){
+		if(ingresso.dataBaixa){
+			res.status(500).send("ENTRADA NÃO PERMITIDA. Já foi registrada a baixa desse ingresso.");
+		} else if(ingresso.bloqueado){
+			res.status(500).send("ENTRADA NÃO PERMITIDA. Ingresso bloqueado! Favor procurar a coordenação.");
+		} else {
 			ingresso.dataBaixa = moment().utc(new Date()).format();		
 			console.log('data que vai rolar a baixa : ', ingresso);
 
@@ -203,8 +206,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 					res.status(201).send("OK");
 				}
 			});
-		} else {
-			res.status(500).send("Já foi registrada a baixa desse ingresso");
+			
 		}
 	};
 

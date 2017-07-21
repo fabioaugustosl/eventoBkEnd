@@ -16,6 +16,7 @@ var ingressoModel = new Schema({
 	valorPG : {type:Number},
 	chave : {type:String},
 	qrcodeImg : {type:String},
+	bloqueado : {type:Boolean, default: false},
 	dataBaixa : {type: Date},
 	guicheBaixa : {type: String},
 	responsavelBaixa : {type: String},
