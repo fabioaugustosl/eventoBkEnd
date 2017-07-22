@@ -289,13 +289,13 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 			}
 						
 			
-			/*console.log('data no listar: ',query.dataBaixa);
-			if(query.dataBaixa){
-				var dataQuery =  moment(query.dataBaixa).format("YYYY-MM-DDTHH:mm:ss")
-				console.log('data query: ', dataQuery);
+			//console.log('data no listar: ',query.dataBaixa);
+			if(req.query.dataBaixa){
+				var dataQuery =  moment(req.query.dataBaixa).format("YYYY-MM-DDTHH:mm:ss")
+				//console.log('data query: ', dataQuery);
 				
-				query.dataBaixa = { $gte: query.dataBaixa }
-			}*/	
+				query.dataBaixa = { $gte: dataQuery };
+			}
 		}
 		 
 		console.log(query);
