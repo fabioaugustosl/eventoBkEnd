@@ -291,10 +291,9 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 			
 			//console.log('data no listar: ',query.dataBaixa);
 			if(req.query.dataBaixa){
-				var dataQuery =  moment(req.query.dataBaixa).format("YYYY-MM-DDTHH:mm:ss")
+				var dataQuery =  moment(req.query.dataBaixa).format();
 				//console.log('data query: ', dataQuery);
-				
-				query.dataBaixa = { $gte: dataQuery };
+				query.push({dataBaixa : { $gte: dataQuery } });	
 			}
 		}
 		 
