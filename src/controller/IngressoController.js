@@ -455,7 +455,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		    	var retorno = [];
 		    	var retornoTotalIngressos = [];
 
-		    	//console.log(result);
+		    	console.log(result);
 		    	for (i = 0; i < result.length; i++) { 
 		        	var dado = result[i];
 		        	//console.log(dado);
@@ -487,6 +487,8 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 						retornoDoidao[cont++] = jsonObjetoRet;
 					}
 		    	}
+
+		    	console.log(retornoDoidao);
 
 		    	res.status(201);
 				res.send(retornoDoidao);
