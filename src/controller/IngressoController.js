@@ -455,7 +455,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		    	var retorno = [];
 		    	var retornoTotalIngressos = [];
 
-		    	console.log(result);
+		    	//console.log(result);
 		    	for (i = 0; i < result.length; i++) { 
 		        	var dado = result[i];
 		        	//console.log(dado);
@@ -475,6 +475,8 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		        	retornoTotalIngressos[dado._id.configuracao] = qtdTotalCateg;
 		    	}
 
+				console.log(retorno);
+				console.log(retornoTotalIngressos);
 		    	var retornoDoidao = [];
 		    	if(retorno){
 		    		var jsonObjetoRet = {};
