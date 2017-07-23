@@ -343,12 +343,12 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 						var returningressos = [];
 						ingressos.forEach(function(element, index, array){
 							var ingressoObj = element.toJSON();
-							ingressoObj.dataDistribuicao = moment(ingressoObj.dataGeracao).format("DD/MM/YYYY");
-							ingressoObj.horaDistribuicao = moment(ingressoObj.dataGeracao).format("HH:mm");
+							ingressoObj.dataDistribuicao = moment(ingressoObj.dataGeracao).utcOffset('-0300').format("DD/MM/YYYY");
+							ingressoObj.horaDistribuicao = moment(ingressoObj.dataGeracao).utcOffset('-0300').format("HH:mm");
 
 							if(ingressoObj.dataBaixa){
-								ingressoObj.dataEntrada = moment(ingressoObj.dataBaixa).format("DD/MM/YYYY");
-								ingressoObj.horaEntrada = moment(ingressoObj.dataBaixa).format("HH:mm");	
+								ingressoObj.dataEntrada = moment(ingressoObj.dataBaixa).utcOffset('-0300').format("DD/MM/YYYY");
+								ingressoObj.horaEntrada = moment(ingressoObj.dataBaixa).utcOffset('-0300').format("HH:mm");	
 							}
 							
 							//ingressoObj.links = {};
