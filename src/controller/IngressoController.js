@@ -343,9 +343,15 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 						var returningressos = [];
 						ingressos.forEach(function(element, index, array){
 							var ingressoObj = element.toJSON();
-							ingressoObj.links = {};
-							ingressoObj.links.self = 'http://'+req.headers.host + '/api/ingresso/v1/' + ingressoObj._id;
-							ingressoObj.links.qrcodeImg = "<img src='"+ingressoObj.qrcodeImg+"' alt='"+ingressoObj.chave+"' />";
+							ingressoObj.dataDistribuicao = moment(ingressoObj.dataGeracao).utc().format("DD/MM/YYYY");
+							ingressoObj.horaDistribuicao = moment(ingressoObj.dataGeracao).utc().format("HH:mm");
+
+							ingressoObj.dataEntrada = moment(ingressoObj.dataBaixa).utc().format("DD/MM/YYYY");
+							ingressoObj.horaEntrada = moment(ingressoObj.dataBaixa).utc().format("HH:mm");
+
+							//ingressoObj.links = {};
+							//ingressoObj.links.self = 'http://'+req.headers.host + '/api/ingresso/v1/' + ingressoObj._id;
+							//ingressoObj.links.qrcodeImg = "<img src='"+ingressoObj.qrcodeImg+"' alt='"+ingressoObj.chave+"' />";
 							returningressos.push(ingressoObj);
 						});
 
