@@ -20,24 +20,24 @@ ingressoUtilRouter.route('/distribuicao/:dono')
 			ingressoController.listarDistribuicaoPorDia(req.params.dono,req, res);
 		});
 
-ingressoUtilRouter.route('/distribuicaoPorConfiguracao/:dono')
+ingressoUtilRouter.route('/distribuicaoporconfiguracao/:dono')
 		.get(function(req, res){
 			console.log('chegou na distribuicao por categoria');
 			ingressoController.listarDistribuicaoPorConfiguracao(req.params.dono,req, res);
 		});
 
-ingressoUtilRouter.route('/entradasEvento/:idEvento')
+ingressoUtilRouter.route('/entradasevento/:idEvento')
 		.get(function(req, res){
 			console.log('chegou na listagem de entradas');
 			ingressoController.listarEntradaEventoPorDia(req.params.idEvento,req, res);
 		});
 
-ingressoUtilRouter.route('/entradasPorCategoria/:idEvento')
+ingressoUtilRouter.route('/entradasporcategoria/:idEvento')
 		.get(function(req, res){
 			ingressoController.listarEntradaEventoPorCategoria(req.params.idEvento,req, res);
 		});
 
-ingressoUtilRouter.route('/listarPaginado/:numMaxRegisros/:pagina')
+ingressoUtilRouter.route('/listarpaginado/:numMaxRegisros/:pagina')
 		.get(function(req, res){
 			ingressoController.listarPaginado(req.params.numMaxRegisros,req.params.pagina,req, res);
 		});
