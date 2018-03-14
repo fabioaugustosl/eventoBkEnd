@@ -35,7 +35,7 @@ app.use(function (req, res, next) {
 //rotas
 
 var eventoRouter = require('./src/routes/EventoRoutes');
-var enderecoRouter = require('./src/routes/EnderecoEventoRoutes');
+var enderecoRouter = require('./src/routes/EnderecoRoutes');
 var enderecoEventoRouter = require('./src/routes/EnderecoEventoRoutes');
 var categoriaRouter = require('./src/routes/CategoriaEventoRoutes');
 var configuracaoIngressoRouter = require('./src/routes/ConfiguracaoIngressoEventoRoutes');
