@@ -455,26 +455,31 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		    	var retorno = [];
 		    	var retornoTotalIngressos = [];
 
-		    	//console.log(result);
-		    	for (i = 0; i < result.length; i++) { 
-		        	var dado = result[i];
-		        	//console.log(dado);
-		        	var qtdCateg = retorno[dado._id.configuracao];
-		        	var qtdTotalCateg = retornoTotalIngressos[dado._id.configuracao];
-		        	
-		        	if(!qtdCateg){
-		        		qtdCateg = 0; 
-		        	}
-		        	if(!qtdTotalCateg){
-		        		qtdTotalCateg = 0; 
-		        	}
-		        	qtdCateg++;
-		        	qtdTotalCateg = qtdTotalCateg+dado.total;
-		        	
-		        	retorno[dado._id.configuracao] = qtdCateg;
-		        	retornoTotalIngressos[dado._id.configuracao] = qtdTotalCateg;
+		    	if(result){
+		    		//console.log(result);
+		    		try {
+		    			for (i = 0; i < result.length; i++) { 
+				        	var dado = result[i];
+				        	//console.log(dado);
+				        	var qtdCateg = retorno[dado._id.configuracao];
+				        	var qtdTotalCateg = retornoTotalIngressos[dado._id.configuracao];
+				        	
+				        	if(!qtdCateg){
+				        		qtdCateg = 0; 
+				        	}
+				        	if(!qtdTotalCateg){
+				        		qtdTotalCateg = 0; 
+				        	}
+				        	qtdCateg++;
+				        	qtdTotalCateg = qtdTotalCateg+dado.total;
+				        	
+				        	retorno[dado._id.configuracao] = qtdCateg;
+				        	retornoTotalIngressos[dado._id.configuracao] = qtdTotalCateg;
+				    	}
+		    		} catch(e){}
+	
 		    	}
-
+		    	
 				console.log(retorno);
 				console.log(retornoTotalIngressos);
 		    	var retornoDoidao = [];
