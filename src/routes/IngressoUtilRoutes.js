@@ -42,4 +42,10 @@ ingressoUtilRouter.route('/listarpaginado/:numMaxRegisros/:pagina')
 			ingressoController.listarPaginado(req.params.numMaxRegisros,req.params.pagina,req, res);
 		});
 
+
+ingressoUtilRouter.route('/distribuicaoporusuario/:idEvento')
+		.get(function(req, res){
+			ingressoController.listarDistribuicaoPorUsuario(req.params.idEvento,req, res);
+		});
+
 module.exports = ingressoUtilRouter;

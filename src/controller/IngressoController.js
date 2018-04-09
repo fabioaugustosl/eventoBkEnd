@@ -327,6 +327,43 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	};
 
 
+	var listarPorCategoriaParaExportacao = function(req, res){
+		console.log(' ::: Listar Ingresso para exportação ');
+
+		var query = [];
+
+		if(req.query){
+
+			if(req.query.idEvento){
+				query.push({idEvento : req.query.idEvento});
+			}
+
+			if(req.query.idConfiguracao){
+				query.push({idConfiguracao : req.query.idConfiguracao});
+			}
+		}
+			
+		 
+		console.log(query);
+		var queryFinal = {};
+		if(query && query.length > 0){
+			queryFinal = { $and: query };
+		}
+
+		
+		ingressoModel.find(	queryFinal)
+		.select({ chave: 1, nomeCliente: 1 , docCliente1: 1, docCliente2: 1, docCliente3: 1, acompanhante: 1, dataGeracao: 1 })
+				.sort({ "dataGeracao": -1 })
+    			.exec(function(err, ingressos){
+					if(err){
+						res.status(500).send(err);
+					} else {
+						res.json(ingressos);
+					}
+				});
+	};
+
+
 
 	var listarPaginado = function(numMaxRegistros, pagina, req, res){
 		console.log(' ::: Listar Ingresso paginado ',numMaxRegistros," - ", pagina);
@@ -416,6 +453,35 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 			}},
 	        // Sorting pipeline
 	        { "$sort": { "dataGeracao": -1 } },
+	        // Optionally limit results
+	        { "$limit": 30 }
+	    ],
+	    function(err,result) {
+	    	console.log(result);
+	    	res.status(201);
+			res.send(result);
+
+
+	       // Result is an array of documents
+	    }
+		);
+	};
+
+
+	var listarDistribuicaoPorUsuario = function(idEventoAtual, req, res){
+		console.log('entrou na dist por usuario');
+		ingressoModel.aggregate(
+	    [	{
+	            "$match": {
+	                idEvento: idEventoAtual
+	            }
+        	},
+			{ "$group": { 
+		        "_id": "responsavelDistribuicao",
+	            "total": {$sum: 1}
+			}},
+	        // Sorting pipeline
+	        //{ "$sort": { "dataGeracao": -1 } },
 	        // Optionally limit results
 	        { "$limit": 30 }
 	    ],
@@ -543,6 +609,9 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	};
 
 
+
+
+
 	var atualizar = function(req, res){
 		console.log(' ::: Atualizar ingresso');
 		if(req.body._id){
@@ -573,6 +642,8 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		listarDistribuicaoPorConfiguracao : listarDistribuicaoPorConfiguracao,
 		listarEntradaEventoPorDia : listarEntradaEventoPorDia, 
 		listarEntradaEventoPorCategoria : listarEntradaEventoPorCategoria,
+		listarPorCategoriaParaExportacao: listarPorCategoriaParaExportacao,
+		listarDistribuicaoPorUsuario : listarDistribuicaoPorUsuario,
 		remover 	: remover,
 		atualizar : atualizar,
 		salvarNovo 	: salvarNovo
