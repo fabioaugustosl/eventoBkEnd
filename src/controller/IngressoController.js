@@ -477,7 +477,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	            }
         	},
 			{ "$group": { 
-		        "_id": "responsavelDistribuicao",
+		        "_id": "$responsavelDistribuicao",
 	            "total": {$sum: 1}
 			}},
 	        // Sorting pipeline
