@@ -469,7 +469,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 
 
 	var listarDistribuicaoPorUsuario = function(idEventoAtual, req, res){
-		console.log('entrou na dist por usuario');
+		console.log('entrou na dist por usuario ', idEventoAtual);
 		ingressoModel.aggregate(
 	    [	{
 	            "$match": {
