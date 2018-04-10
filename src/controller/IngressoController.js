@@ -471,19 +471,20 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 	var listarDistribuicaoPorUsuario = function(idEventoAtual, req, res){
 		console.log('entrou na dist por usuario ', idEventoAtual);
 		ingressoModel.aggregate(
-	    [	{
+	    [	/*{
 	            "$match": {
 	                idEvento: idEventoAtual
 	            }
-        	},
+        	},*/
 			{ "$group": { 
 		        "_id": "$responsavelDistribuicao",
 	            "total": {$sum: 1}
-			}},
+			}}
+			//,
 	        // Sorting pipeline
 	        //{ "$sort": { "dataGeracao": -1 } },
 	        // Optionally limit results
-	        { "$limit": 30 }
+	        //{ "$limit": 30 }
 	    ],
 	    function(err,result) {
 	    	console.log(result);
