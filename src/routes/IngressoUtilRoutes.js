@@ -48,4 +48,29 @@ ingressoUtilRouter.route('/distribuicaoporusuario/:idEvento')
 			ingressoController.listarDistribuicaoPorUsuario(req.params.idEvento,req, res);
 		});
 
+
+ingressoUtilRouter.route('/xls/:idEvento')
+		.get(function(req, res){
+			
+			ingressoController.listarPorCategoriaParaExportacao(req, res);
+
+			/*var jsonArr = [{
+			    foo: 'bar',
+			    qux: 'moo',
+			    poo: 123,
+			    stux: new Date()
+			},
+			{
+			    foo: 'bar',
+			    qux: 'moo',
+			    poo: 345,
+			    stux: new Date()
+			}];
+
+			res.xls('data.xlsx', jsonArr);*/
+
+		});
+		
+
+
 module.exports = ingressoUtilRouter;

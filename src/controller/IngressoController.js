@@ -352,13 +352,31 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 
 		
 		ingressoModel.find(	queryFinal)
-		.select({ chave: 1, nomeCliente: 1 , docCliente1: 1, docCliente2: 1, docCliente3: 1, acompanhante: 1, dataGeracao: 1 })
-				.sort({ "dataGeracao": -1 })
+				.select({ chave: 1, nomeCliente: 1 , docCliente1: 1, docCliente2: 1, docCliente3: 1, acompanhante: 1, dataGeracao: 1, responsavelDistribuicao: 1 })
     			.exec(function(err, ingressos){
 					if(err){
 						res.status(500).send(err);
 					} else {
-						res.json(ingressos);
+						console.log(ingressos);
+
+						var returningressos = [];
+						ingressos.forEach(function(element, index, array){
+							var ingressoObj = element.toJSON();
+							
+							var obj = {};
+							obj.codigoIngresso = ingressoObj.chave;
+							obj.nome = ingressoObj.nomeCliente;
+							obj.cpfCnpj = ingressoObj.docCliente1;
+							obj.conta = ingressoObj.docCliente3;
+							obj.responsavel = ingressoObj.acompanhante;
+							obj.cpfResponsavel = ingressoObj.docCliente2;
+							obj.data = moment(ingressoObj.dataGeracao).utcOffset('-0300').format("DD/MM/YYYY");
+							obj.responsavelDistribuicao = ingressoObj.responsavelDistribuicao;
+
+							returningressos.push(obj);
+						});
+
+						res.xls('ingressos.xlsx', returningressos);
 					}
 				});
 	};
@@ -470,31 +488,23 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 
 	var listarDistribuicaoPorUsuario = function(idEventoAtual, req, res){
 		console.log('entrou na dist por usuario ', idEventoAtual);
-		ingressoModel.aggregate(
-	    [	/*{
-	            "$match": {
-	                idEvento: idEventoAtual
-	            }
-        	},*/
-			{ "$group": { 
-		        "_id": "$responsavelDistribuicao",
-	            "total": {$sum: 1}
-			}}
-			//,
-	        // Sorting pipeline
-	        //{ "$sort": { "dataGeracao": -1 } },
-	        // Optionally limit results
-	        //{ "$limit": 30 }
-	    ],
-	    function(err,result) {
-	    	console.log(result);
-	    	res.status(201);
-			res.send(result);
+		ingressoModel.aggregate([
+        {
+            $group: {
+                _id: '$dono',  //$region is the column name in collection
+                count: {$sum: 1}
+            }
+        }
+    ], function (err, result) {
+    	console.log(result);
+        if (err) {
+            console.log('ERRO: ',err);
+        } else {
+            res.json(result);
+        }
+    });
 
-
-	       // Result is an array of documents
-	    }
-		);
+		
 	};
 
 	
