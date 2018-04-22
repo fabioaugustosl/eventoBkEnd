@@ -357,7 +357,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 					if(err){
 						res.status(500).send(err);
 					} else {
-						console.log(ingressos);
+						//console.log(ingressos);
 
 						var returningressos = [];
 						ingressos.forEach(function(element, index, array){
