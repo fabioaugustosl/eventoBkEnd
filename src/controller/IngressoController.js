@@ -491,7 +491,7 @@ var ingressoController = function(ingressoModel, configuracaoIngressoModel){
 		ingressoModel.aggregate([
         {
             $group: {
-                _id: '$dono',  //$region is the column name in collection
+                _id: '$responsavelDistribuicao',  //$region is the column name in collection
                 count: {$sum: 1}
             }
         }
